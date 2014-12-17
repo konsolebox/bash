@@ -92,6 +92,14 @@ extern int posixly_correct;
 
 static int declare_internal __P((register WORD_LIST *, int));
 
+#if defined (ARRAY_VARS)
+  #ifdef DELAYED_COMPOUNDS_DEFAULT
+int delayed_compounds = 1;
+  #else
+int delayed_compounds = 0;
+  #endif
+#endif
+
 /* Declare or change variable attributes. */
 int
 declare_builtin (list)
@@ -540,7 +548,7 @@ declare_internal (list, local_var)
 	      int vlen;
 	      vlen = STRLEN (value);
 
-	      if (value[0] == '(' && value[vlen-1] == ')')
+	      if (delayed_compounds && value[0] == '(' && value[vlen-1] == ')')
 		compound_array_assign = 1;
 	      else
 		simple_array_assign = 1;

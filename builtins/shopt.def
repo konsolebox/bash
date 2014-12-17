@@ -117,6 +117,10 @@ extern char *shell_name;
 extern int debugging_mode;
 #endif
 
+#if defined (ARRAY_VARS)
+  extern int delayed_compounds;
+#endif
+
 static void shopt_error __P((char *));
 
 static int set_shellopts_after_change __P((char *, int));
@@ -163,8 +167,15 @@ static struct {
   { "compat42", &shopt_compat41, set_compatibility_level },
 #if defined (READLINE)
   { "complete_fullquote", &complete_fullquote, (shopt_set_func_t *)NULL},
+  #if defined (ARRAY_VARS)
+  { "delayed_compounds", &delayed_compounds, (shopt_set_func_t *)NULL },
+  #endif
   { "direxpand", &dircomplete_expand, shopt_set_complete_direxpand },
   { "dirspell", &dircomplete_spelling, (shopt_set_func_t *)NULL },
+#else
+  #if defined (ARRAY_VARS)
+  { "delayed_compounds", &delayed_compounds, (shopt_set_func_t *)NULL },
+  #endif
 #endif
   { "dotglob", &glob_dot_filenames, (shopt_set_func_t *)NULL },
   { "execfail", &no_exit_on_failed_exec, (shopt_set_func_t *)NULL },

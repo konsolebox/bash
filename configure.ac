@@ -228,6 +228,7 @@ AC_ARG_ENABLE(cond-command, AC_HELP_STRING([--enable-cond-command], [enable the 
 AC_ARG_ENABLE(cond-regexp, AC_HELP_STRING([--enable-cond-regexp], [enable extended regular expression matching in conditional commands]), opt_cond_regexp=$enableval)
 AC_ARG_ENABLE(coprocesses, AC_HELP_STRING([--enable-coprocesses], [enable coprocess support and the coproc reserved word]), opt_coproc=$enableval)
 AC_ARG_ENABLE(debugger, AC_HELP_STRING([--enable-debugger], [enable support for bash debugger]), opt_debugger=$enableval)
+AC_ARG_ENABLE(delayed-compounds-default, AC_HELP_STRING([--enable-delayed-compounds-default], [enable the delayed_compounds shell option by default]), opt_delayed_compounds_default=$enableval)
 AC_ARG_ENABLE(direxpand-default, AC_HELP_STRING([--enable-direxpand-default], [enable the direxpand shell option by default]), opt_dircomplete_expand_default=$enableval)
 AC_ARG_ENABLE(directory-stack, AC_HELP_STRING([--enable-directory-stack], [enable builtins pushd/popd/dirs]), opt_dirstack=$enableval)
 AC_ARG_ENABLE(disabled-builtins, AC_HELP_STRING([--enable-disabled-builtins], [allow disabled builtins to still be invoked]), opt_disabled_builtins=$enableval)
@@ -348,6 +349,9 @@ AC_DEFINE(CASEMOD_ATTRS)
 fi
 if test $opt_casemod_expansions = yes; then
 AC_DEFINE(CASEMOD_EXPANSIONS)
+fi
+if test $opt_delayed_compounds_default = yes; then
+AC_DEFINE(DELAYED_COMPOUNDS_DEFAULT)
 fi
 if test $opt_dircomplete_expand_default = yes; then
 AC_DEFINE(DIRCOMPLETE_EXPAND_DEFAULT)

@@ -4992,6 +4992,11 @@ filenames.
 This variable is set by default, which is the default Bash behavior in
 versions through 4.2.
 
+@item delayed_compounds
+If set, Bash
+would recognize expanded arguments to @code{declare} or @code{local} to be
+recognized as possible forms of assigning compound values to arrays.
+
 @item direxpand
 If set, Bash
 replaces directory names with the results of word expansion when performing
@@ -8076,6 +8081,11 @@ Include support for coprocesses and the @code{coproc} reserved word
 
 @item --enable-debugger
 Include support for the bash debugger (distributed separately).
+
+@item --enable-delayed-compounds-default
+Cause the @code{delayed_compounds} shell option (@pxref{The Shopt Builtin})
+to be enabled by default when the shell starts.
+It is normally disabled by default.
 
 @item --enable-direxpand-default
 Cause the @code{direxpand} shell option (@pxref{The Shopt Builtin})

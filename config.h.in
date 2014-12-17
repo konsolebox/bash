@@ -167,6 +167,9 @@
 /* Define for case-modifying word expansions */
 #undef CASEMOD_EXPANSIONS
 
+/* Define to make the `delayed_compounds' shopt option enabled by default. */
+#undef DELAYED_COMPOUNDS_DEFAULT
+
 /* Define to make the `direxpand' shopt option enabled by default. */
 #undef DIRCOMPLETE_EXPAND_DEFAULT
 
