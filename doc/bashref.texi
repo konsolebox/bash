@@ -4994,7 +4994,7 @@ versions through 4.2.
 
 @item delayed_compounds
 If set, Bash
-would recognize expanded arguments to @code{declare} or @code{local} to be
+would allow expanded arguments to @code{declare} or @code{local} to be
 recognized as possible forms of assigning compound values to arrays.
 
 @item direxpand
