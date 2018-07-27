@@ -172,7 +172,7 @@ static int read_token __P((int));
 static char *parse_matched_pair __P((int, int, int, int *, int));
 static char *parse_comsub __P((int, int, int, int *, int));
 #if defined (ARRAY_VARS)
-static char *parse_compound_assignment __P((int *));
+static char *parse_compound_assignment __P((int *, int));
 #endif
 #if defined (DPAREN_ARITHMETIC) || defined (ARITH_FOR_COMMAND)
 static int parse_dparen __P((int));
@@ -3274,6 +3274,12 @@ itrace("shell_getc: bash_input.location.string = `%s'", bash_input.location.stri
   if (parser_state & PST_REGEXP)
     goto tokword;
 
+  if MBTEST(parser_state & PST_ASSIGNASSOC && character == '}')
+    {
+      parser_state &= ~PST_ASSIGNOK;
+      return (character);
+    }
+
   /* Shell meta-characters. */
   if MBTEST(shellmeta (character) && ((parser_state & PST_DBLPAREN) == 0))
     {
@@ -5151,25 +5157,27 @@ read_token_word (character)
       else if MBTEST(character == '=' && token_index > 0 && (assignment_acceptable (last_read_token) || (parser_state & PST_ASSIGNOK)) && token_is_assignment (token, token_index))
 	{
 	  peek_char = shell_getc (1);
-	  if MBTEST(peek_char == '(')		/* ) */
+	  if MBTEST(peek_char == '(' || peek_char == '{')	/* ) */
 	    {
-	      ttok = parse_compound_assignment (&ttoklen);
+	      int assoc;
+	      assoc = peek_char == '{';
+	      ttok = parse_compound_assignment (&ttoklen, assoc);
 
 	      RESIZE_MALLOCED_BUFFER (token, token_index, ttoklen + 4,
 				      token_buffer_size,
 				      TOKEN_DEFAULT_GROW_SIZE);
 
 	      token[token_index++] = '=';
-	      token[token_index++] = '(';
+	      token[token_index++] = peek_char;
 	      if (ttok)
 		{
 		  strcpy (token + token_index, ttok);
 		  token_index += ttoklen;
 		}
-	      token[token_index++] = ')';
+	      token[token_index++] = assoc ? '}' : ')';
 	      FREE (ttok);
 	      all_digit_token = 0;
-	      compound_assignment = 1;
+	      compound_assignment = assoc ? 2 : 1;
 #if 1
 	      goto next_character;
 #else
@@ -5180,6 +5188,12 @@ read_token_word (character)
 	    shell_ungetc (peek_char);
 	}
 #endif
+
+      if MBTEST(parser_state & PST_ASSIGNASSOC && character == '}')
+	{
+	  shell_ungetc (character);
+	  goto got_token;
+	}
 
       /* When not parsing a multi-character word construct, shell meta-
 	 characters break words. */
@@ -5274,8 +5288,13 @@ got_token:
     the_word->flags |= W_HASDOLLAR;
   if (quoted)
     the_word->flags |= W_QUOTED;		/*(*/
-  if (compound_assignment && token[token_index-1] == ')')
+  if (compound_assignment == 1 && token[token_index-1] == ')')
     the_word->flags |= W_COMPASSIGN;
+  if (compound_assignment == 2 && token[token_index-1] == '}')
+    {
+      the_word->flags |= W_COMPASSIGN;
+      the_word->flags |= W_ASSIGNASSOC;
+    }
   /* A word is an assignment if it appears at the beginning of a
      simple command, or after another assignment word.  This is
      context-dependent, so it cannot be handled in the grammar. */
@@ -6443,8 +6462,9 @@ parse_string_to_word_list (s, flags, whom)
 }
 
 static char *
-parse_compound_assignment (retlenp)
+parse_compound_assignment (retlenp, assoc)
      int *retlenp;
+     int assoc;
 {
   WORD_LIST *wl, *rl;
   int tok, orig_line_number, orig_token_size, orig_last_token, assignok;
@@ -6465,7 +6485,13 @@ parse_compound_assignment (retlenp)
   wl = (WORD_LIST *)NULL;	/* ( */
   parser_state |= PST_COMPASSIGN;
 
-  while ((tok = read_token (READ)) != ')')
+  if (assoc)
+    parser_state |= PST_ASSIGNASSOC;
+
+  int matcher;
+  matcher = assoc ? '}' : ')';
+
+  while ((tok = read_token (READ)) != matcher)
     {
       if (tok == '\n')			/* Allow newlines in compound assignments */
 	{
@@ -6476,8 +6502,10 @@ parse_compound_assignment (retlenp)
       if (tok != WORD && tok != ASSIGNMENT_WORD)
 	{
 	  current_token = tok;	/* for error reporting */
-	  if (tok == yacc_EOF)	/* ( */
-	    parser_error (orig_line_number, _("unexpected EOF while looking for matching `)'"));
+	  if (tok == yacc_EOF)
+	    parser_error (orig_line_number,
+		_("unexpected EOF while looking for matching `%c'"),
+		matcher);
 	  else
 	    yyerror(NULL);	/* does the right thing */
 	  if (wl)
@@ -6492,7 +6520,7 @@ parse_compound_assignment (retlenp)
   token = saved_token;
   token_buffer_size = orig_token_size;
 
-  parser_state &= ~PST_COMPASSIGN;
+  parser_state &= ~(PST_COMPASSIGN|PST_ASSIGNASSOC);
 
   if (wl == &parse_string_error)
     {

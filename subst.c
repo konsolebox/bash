@@ -1292,7 +1292,7 @@ extract_array_assignment_list (string, sindex)
   char *ret;
 
   slen = strlen (string);
-  if (string[slen - 1] == RPAREN)
+  if (string[slen - 1] == RPAREN || string[slen - 1] == RBRACE)
    {
       ret = substring (string, *sindex, slen - 1);
       *sindex = slen - 1;
