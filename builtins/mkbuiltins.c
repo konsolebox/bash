@@ -73,6 +73,7 @@ extern char *strcpy ();
 #define BUILTIN_FLAG_ASSIGNMENT 0x02
 #define BUILTIN_FLAG_LOCALVAR	0x04
 #define BUILTIN_FLAG_POSIX_BUILTIN 0x08
+#define BUILTIN_FLAG_INITIALLY_DISABLED 0x10
 
 #define BASE_INDENT	4
 
@@ -173,11 +174,18 @@ char *posix_builtins[] =
   (char *)NULL
 };
 
+/* Initially disabled builtins */
+char *initially_disabled_builtins[] =
+{
+  "sleep"
+};
+
 /* Forward declarations. */
 static int is_special_builtin ();
 static int is_assignment_builtin ();
 static int is_localvar_builtin ();
 static int is_posix_builtin ();
+static int is_initially_disabled ();
 
 #if !defined (HAVE_RENAME)
 static int rename ();
@@ -831,6 +839,8 @@ builtin_handler (self, defs, arg)
     new->flags |= BUILTIN_FLAG_LOCALVAR;
   if (is_posix_builtin (name))
     new->flags |= BUILTIN_FLAG_POSIX_BUILTIN;
+  if (is_initially_disabled (name))
+    new->flags |= BUILTIN_FLAG_INITIALLY_DISABLED;
 
   array_add ((char *)new, defs->builtins);
   building_builtin = 1;
@@ -1250,8 +1260,9 @@ write_builtins (defs, structfile, externfile)
 		  else
 		    fprintf (structfile, "(sh_builtin_func_t *)0x0, ");
 
-		  fprintf (structfile, "%s%s%s%s%s, %s_doc,\n",
-		    "BUILTIN_ENABLED | STATIC_BUILTIN",
+		  fprintf (structfile, "%s%s%s%s%s%s, %s_doc,\n",
+		    "STATIC_BUILTIN",
+		    (builtin->flags & BUILTIN_FLAG_INITIALLY_DISABLED) ? "" : " | BUILTIN_ENABLED",
 		    (builtin->flags & BUILTIN_FLAG_SPECIAL) ? " | SPECIAL_BUILTIN" : "",
 		    (builtin->flags & BUILTIN_FLAG_ASSIGNMENT) ? " | ASSIGNMENT_BUILTIN" : "",
 		    (builtin->flags & BUILTIN_FLAG_LOCALVAR) ? " | LOCALVAR_BUILTIN" : "",
@@ -1643,6 +1654,13 @@ is_posix_builtin (name)
      char *name;
 {
   return (_find_in_table (name, posix_builtins));
+}
+
+static int
+is_initially_disabled (name)
+     char *name;
+{
+  return (_find_in_table (name, initially_disabled_builtins));
 }
 
 #if !defined (HAVE_RENAME)

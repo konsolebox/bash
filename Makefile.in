@@ -505,7 +505,7 @@ BUILTIN_DEFS = $(DEFSRC)/alias.def $(DEFSRC)/bind.def $(DEFSRC)/break.def \
 	       $(DEFSRC)/ulimit.def $(DEFSRC)/umask.def $(DEFSRC)/wait.def \
 	       $(DEFSRC)/getopts.def $(DEFSRC)/reserved.def \
 	       $(DEFSRC)/pushd.def $(DEFSRC)/shopt.def $(DEFSRC)/printf.def \
-	       $(DEFSRC)/mapfile.def
+	       $(DEFSRC)/mapfile.def $(DEFSRC)/sleep.def
 BUILTIN_C_SRC  = $(DEFSRC)/mkbuiltins.c $(DEFSRC)/common.c \
 		 $(DEFSRC)/evalstring.c $(DEFSRC)/evalfile.c \
 		 $(DEFSRC)/bashgetopt.c $(GETOPT_SOURCE)
@@ -1650,4 +1650,5 @@ builtins/trap.o: $(DEFSRC)/trap.def
 builtins/type.o: $(DEFSRC)/type.def
 builtins/ulimit.o: $(DEFSRC)/ulimit.def
 builtins/umask.o: $(DEFSRC)/umask.def
+builtins/sleep.o: $(DEFSRC)/sleep.def
 builtins/wait.o: $(DEFSRC)/wait.def
