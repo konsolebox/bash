@@ -104,6 +104,7 @@ enum command_type { cm_for, cm_case, cm_while, cm_if, cm_simple, cm_select,
 #define W_CHKLOCAL	(1 << 28)	/* check for local vars on assignment */
 #define W_NOASSNTILDE	(1 << 29)	/* don't do tilde expansion like an assignment statement */
 #define W_FORCELOCAL	(1 << 30)	/* force assignments to be to local variables, non-fatal on assignment errors */
+#define W_NOEXPAND	(1 << 31)	/* inhibits any form of expansion */
 
 /* Flags for the `pflags' argument to param_expand() and various
    parameter_brace_expand_xxx functions; also used for string_list_dollar_at */

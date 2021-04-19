@@ -4378,6 +4378,8 @@ dequote_list (list)
 
   for (tlist = list; tlist; tlist = tlist->next)
     {
+      if (tlist->word->flags & W_NOEXPAND)
+	continue;
       s = dequote_string (tlist->word->word);
       if (QUOTED_NULL (tlist->word->word))
 	tlist->word->flags &= ~W_HASQUOTEDNULL;
@@ -11391,9 +11393,11 @@ glob_expand_word_list (tlist, eflags)
 	 words are freed. */
       next = tlist->next;
 
+      if (tlist->word->flags & W_NOEXPAND)
+	PREPEND_LIST (tlist, output_list);
       /* If the word isn't an assignment and contains an unquoted
 	 pattern matching character, then glob it. */
-      if ((tlist->word->flags & W_NOGLOB) == 0 &&
+      else if ((tlist->word->flags & W_NOGLOB) == 0 &&
 	  unquoted_glob_pattern_p (tlist->word->word))
 	{
 	  glob_array = shell_glob_filename (tlist->word->word, QGLOB_CTLESC);	/* XXX */
@@ -11487,7 +11491,7 @@ brace_expand_word_list (tlist, eflags)
     {
       next = tlist->next;
 
-      if (tlist->word->flags & W_NOBRACE)
+      if (tlist->word->flags & (W_NOBRACE|W_NOEXPAND))
         {
 /*itrace("brace_expand_word_list: %s: W_NOBRACE", tlist->word->word);*/
 	  PREPEND_LIST (tlist, output_list);
@@ -11862,6 +11866,12 @@ shell_expand_word_list (tlist, eflags)
 	wcmd = tlist;
 	
       next = tlist->next;
+
+      if (tlist->word->flags & W_NOEXPAND)
+	{
+	  new_list = make_word_list (copy_word (tlist->word), new_list);
+	  continue;
+	}
 
 #if defined (ARRAY_VARS)
       /* If this is a compound array assignment to a builtin that accepts

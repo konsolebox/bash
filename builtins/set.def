@@ -872,10 +872,6 @@ unset_builtin (list)
   else if (unset_function && nameref)
     nameref = 0;
 
-#if defined (ARRAY_VARS)
-  vflags = assoc_expand_once ? (VA_NOEXPAND|VA_ONEWORD) : 0;
-#endif
-
   while (list)
     {
       SHELL_VAR *var;
@@ -890,6 +886,9 @@ unset_builtin (list)
       unset_variable = global_unset_var;
 
 #if defined (ARRAY_VARS)
+      vflags = (assoc_expand_once && (list->word->flags & W_NOEXPAND) == 0) ?
+	  (VA_NOEXPAND|VA_ONEWORD) : 0;
+
       unset_array = 0;
       /* XXX valid array reference second arg was 0 */
       if (!unset_function && nameref == 0 && valid_array_reference (name, vflags))
