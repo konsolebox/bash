@@ -129,7 +129,7 @@ enum command_type { cm_for, cm_case, cm_while, cm_if, cm_simple, cm_select,
 /* A structure which represents a word. */
 typedef struct word_desc {
   char *word;		/* Zero terminated string. */
-  int flags;		/* Flags associated with this word. */
+  unsigned int flags;		/* Flags associated with this word. */
 } WORD_DESC;
 
 /* A linked list of words. */
