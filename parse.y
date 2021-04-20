@@ -5406,7 +5406,15 @@ got_token:
 	parser_state |= PST_ASSIGNOK;
       else if (STREQ (token, "eval") || STREQ (token, "let"))
 	parser_state |= PST_ASSIGNOK;
+#if defined (ARRAY_VARS)
+      else if (STREQ (token, "unset"))
+	parser_state |= PST_UNSET;
+#endif
     }
+#if defined (ARRAY_VARS)
+  else if (parser_state & PST_UNSET && valid_array_reference (token, 0))
+    the_word->flags |= W_NOEXPAND;
+#endif
 
   yylval.word = the_word;
 
